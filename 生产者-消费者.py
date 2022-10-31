@@ -1,5 +1,5 @@
-from tkinter import Tk, Label, Canvas, Button
 import threading
+from tkinter import Tk, Label, Canvas, Button
 from queue import Queue
 from random import random
 from time import sleep
