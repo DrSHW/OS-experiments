@@ -1,3 +1,7 @@
+"""
+    status: Accepted
+"""
+
 import threading
 from tkinter import Tk, Label, Canvas, Button
 from queue import Queue
