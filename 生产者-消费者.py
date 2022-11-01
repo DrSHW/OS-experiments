@@ -54,13 +54,24 @@ class Widget:
         y = 40 * (self.num // 5 + 1)
         self.buffer.create_window(x, y - 20, window=product)  # 将按钮放入缓冲区
         self.num += 1  # 缓冲区中产品数量加一
-        self.product_list.append(product)  # 将按钮放入缓冲区中
+        self.product_list.append({
+            'product': product,
+            'pd_index': pd_index
+        })  # 将按钮放入缓冲区中
 
     def reduce_product(self):
         if self.product_list:  # 如果缓冲区中有产品
-            b = self.product_list.pop()  # 弹出最后一个产品
-            self.num -= 1  # 缓冲区中按钮数量减一
-            b.destroy()  # 销毁按钮
+            # 遍历队列
+            for index in range(len(self.product_list)):
+                if index == len(self.product_list) - 1:
+                    # 如果是最后一个产品，删除
+                    b = self.product_list.pop()  # 弹出最后一个产品
+                    self.num -= 1
+                    b['product'].destroy()  # 销毁按钮
+                    break
+                # 置换颜色
+                self.product_list[index]['product'].config(bg=self.color_list[self.product_list[index + 1]['pd_index']])
+                self.product_list[index]['pd_index'] = self.product_list[index + 1]['pd_index']
         return self.num  # 返回缓冲区中按钮数量
 
     def run(self):
