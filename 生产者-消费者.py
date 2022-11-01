@@ -12,7 +12,9 @@ class Widget:
     # 实例化TK对象，用于创建窗口
     root = Tk()
     # 设置窗口大小
-    root.geometry('450x180')
+    root.geometry('450x165')
+    # 禁止窗口缩放
+    root.resizable(0, 0)
     # 设置窗口标题
     root.title('生产者消费者模型')
 
