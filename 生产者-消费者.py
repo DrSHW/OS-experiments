@@ -37,8 +37,8 @@ class Widget:
     # 实例化缓冲区矩形
     buffer = Canvas(root, relief='ridge', width=240, height=80, bg='white')
 
-    product_list = []  # 缓冲区中的产品列表
-    num = 0  # 此时缓冲区中的产品数量
+    button_list = []  # 缓冲区中显示的按钮列表
+    num = 0  # 此时缓冲区中的按钮数量
 
     def __init__(self):
         # 排列生产者矩形
@@ -52,32 +52,32 @@ class Widget:
         self.buffer.create_text(120, 40, text='缓冲区')  # 创建缓冲区的文字
         self.buffer.place(x=100, y=40)  # 将缓冲区放入窗口中
 
-    def add_product(self, pd_index, obj_index):
+    def add_button_in_buffer(self, pd_index, obj_index):
         # 实例化按钮
-        product = Button(self.root, text='产品' + str(obj_index), bg=self.color_list[pd_index])
+        btn = Button(self.root, text='产品' + str(obj_index), bg=self.color_list[pd_index])
         # 将按钮放入缓冲区的矩形中，按行列从左至右，从上至下排列
         x = (40 * self.num) % 200 + 40
         y = 40 * (self.num // 5 + 1)
-        self.buffer.create_window(x, y - 20, window=product)  # 将按钮放入缓冲区
-        self.num += 1  # 缓冲区中产品数量加一
-        self.product_list.append({
-            'product': product,
+        self.buffer.create_window(x, y - 20, window=btn)  # 将按钮放入缓冲区
+        self.num += 1  # 缓冲区中按钮数量加一
+        self.button_list.append({
+            'product': btn,
             'pd_index': pd_index
         })  # 将按钮放入缓冲区中
 
-    def reduce_product(self):
-        if self.product_list:  # 如果缓冲区中有产品
+    def reduce_button_in_buffer(self):
+        if self.button_list:  # 如果缓冲区中有按钮
             # 遍历队列
-            for index in range(len(self.product_list)):
-                if index == len(self.product_list) - 1:
-                    # 如果是最后一个产品，删除
-                    b = self.product_list.pop()  # 弹出最后一个产品
+            for index in range(len(self.button_list)):
+                if index == len(self.button_list) - 1:
+                    # 如果是最后一个按钮，删除
+                    b = self.button_list.pop()  # 弹出最后一个按钮
                     self.num -= 1
                     b['product'].destroy()  # 销毁按钮
                     break
                 # 置换颜色
-                self.product_list[index]['product'].config(bg=self.color_list[self.product_list[index + 1]['pd_index']])
-                self.product_list[index]['pd_index'] = self.product_list[index + 1]['pd_index']
+                self.button_list[index]['product'].config(bg=self.color_list[self.button_list[index + 1]['pd_index']])
+                self.button_list[index]['pd_index'] = self.button_list[index + 1]['pd_index']
         return self.num  # 返回缓冲区中按钮数量
 
     def run(self):
@@ -123,7 +123,7 @@ class Manager:
     @staticmethod
     def __add_item(pd_index, b_q):
         sleep(random())  # 模拟将产品放入缓冲区的时间
-        wg.add_product(pd_index, wg.num + 1)  # 将产品放入缓冲区
+        wg.add_button_in_buffer(pd_index, wg.num + 1)  # 模拟将产品放入缓冲区
         b_q.put(
             {'pd_index': pd_index, 'obj_index': wg.num}  # 将生产的产品放入缓冲区
         )
@@ -134,7 +134,7 @@ class Manager:
         sleep(random())  # 模拟从缓冲区取出产品的时间
         obj_index = b_q.get()  # 从缓冲区取出产品
         getattr(wg, 'c' + str(c_index)).config(bg='blue')  # 持有产品后，消费者变为蓝色
-        wg.reduce_product()  # 从缓冲区中删除产品
+        wg.reduce_button_in_buffer()  # 模拟从缓冲区中删除产品
 
     @staticmethod
     def __consume(c_index):
