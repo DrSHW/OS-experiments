@@ -152,7 +152,7 @@ class Monitor:
         wg.reduce_button_in_buffer()  # 模拟从缓冲区中删除产品
 
 
-m = Manager()  # 实例化管程
+m = Monitor()  # 实例化管程
 
 
 def producer(pd_index):
