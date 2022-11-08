@@ -8,6 +8,19 @@ from queue import Queue
 from random import random
 from time import sleep
 
+import threading
+
+
+# 实现synchronized装饰器，保证互斥访问
+def synchronized(func):
+    func.__lock__ = threading.Lock()  # 执行前加锁
+
+    def synced_func(*args, **kws):
+        with func.__lock__:  # with上下文管理，执行结束自动解锁
+            return func(*args, **kws)
+
+    return synced_func
+
 
 class Widget:
     # 初始化生产者的颜色
@@ -53,6 +66,7 @@ class Widget:
         self.buffer.place(x=100, y=40)  # 将缓冲区放入窗口中
 
     def add_button_in_buffer(self, pd_index, obj_index):
+        """ 向缓冲区矩形中添加按钮 """
         # 实例化按钮
         btn = Button(self.root, text='产品' + str(obj_index), bg=self.color_list[pd_index])
         # 将按钮放入缓冲区的矩形中，按行列从左至右，从上至下排列
@@ -66,6 +80,7 @@ class Widget:
         })  # 将按钮放入缓冲区中
 
     def reduce_button_in_buffer(self):
+        """ 删除缓冲区矩形中的按钮，并置换颜色以模拟队头被消耗 """
         if self.button_list:  # 如果缓冲区中有按钮
             # 遍历队列
             for index in range(len(self.button_list)):
@@ -85,43 +100,42 @@ class Widget:
 
 
 class Manager:
-    mutex = threading.Semaphore(1)  # 互斥信号量，实现对缓冲区的互斥访问
     empty = threading.Semaphore(10)  # 同步信号量，表示空闲缓冲区的数量
     full = threading.Semaphore(0)  # 同步信号量，表示产品的数量，即非空缓冲区的数量
 
     q = Queue(10)  # 创建上限为10的缓冲区
 
-    # 生产者进程
-    def producer(self, pd_index):
-        while True:
-            # 生产产品
-            self.__produce(pd_index)
-            self.empty.acquire()  # 实现同步，消耗一个空闲缓冲区
-            self.mutex.acquire()  # 实现互斥
-            # 将产品放入缓冲区
-            self.__add_item(pd_index, self.q)
-            self.mutex.release()  # 实现互斥
-            self.full.release()  # 实现同步，增加一个产品
+    @synchronized
+    def insert_item(self, pd_index):
+        """ 生产者对缓冲区的访问控制，添加synchronized，最多只能有一个线程进入管程 """
+        self.empty.acquire()  # 实现同步，消耗一个空闲缓冲区
+        # 将产品放入缓冲区
+        self.__add_item(pd_index, self.q)
+        self.full.release()  # 实现同步，增加一个产品
 
-    # 消费者进程
-    def consumer(self, c_index):
-        while True:
-            self.full.acquire()  # 实现同步，消耗一个产品
-            self.mutex.acquire()  # 实现互斥
-            # 从缓冲区取出产品
-            self.__get_item(c_index, self.q)
-            self.mutex.release()  # 实现互斥
-            self.empty.release()  # 实现同步，增加一个空闲缓冲区
-            # 消费产品
-            self.__consume(c_index)
+    @synchronized
+    def remove_item(self, c_index):
+        """ 消费者对缓冲区的访问控制，添加synchronized，最多只能有一个线程进入管程 """
+        self.full.acquire()  # 实现同步，消耗一个产品
+        # 从缓冲区取出产品
+        self.__get_item(c_index, self.q)
+        self.empty.release()  # 实现同步，增加一个空闲缓冲区
 
     @staticmethod
-    def __produce(pd_index):
+    def produce(pd_index):
+        """ 生产产品 """
         sleep(random())  # 模拟生产产品的时间
         getattr(wg, 'p' + str(pd_index)).config(bg=wg.color_list[pd_index])  # 持有产品后，生产者变为彩色
 
     @staticmethod
+    def consume(c_index):
+        """ 消费产品 """
+        sleep(random() / 1.25)  # 模拟消费产品的时间
+        getattr(wg, 'c' + str(c_index)).config(bg=wg.color_list[0])  # 消费产品后，消费者变为灰色
+
+    @staticmethod
     def __add_item(pd_index, b_q):
+        """ 将产品放入缓冲区，设为私有方法 """
         sleep(random())  # 模拟将产品放入缓冲区的时间
         wg.add_button_in_buffer(pd_index, wg.num + 1)  # 模拟将产品放入缓冲区
         b_q.put(
@@ -131,28 +145,44 @@ class Manager:
 
     @staticmethod
     def __get_item(c_index, b_q):
+        """ 从缓冲区中取出产品，设为私有方法 """
         sleep(random())  # 模拟从缓冲区取出产品的时间
         obj_index = b_q.get()  # 从缓冲区取出产品
         getattr(wg, 'c' + str(c_index)).config(bg='blue')  # 持有产品后，消费者变为蓝色
         wg.reduce_button_in_buffer()  # 模拟从缓冲区中删除产品
 
-    @staticmethod
-    def __consume(c_index):
-        sleep(random() / 1.5)  # 模拟消费产品的时间
-        getattr(wg, 'c' + str(c_index)).config(bg=wg.color_list[0])  # 消费产品后，消费者变为灰色
+
+m = Manager()  # 实例化管程
+
+
+def producer(pd_index):
+    """ 生产者线程 """
+    while True:
+        # 生产产品
+        m.produce(pd_index)
+        # 将产品放入缓冲区
+        m.insert_item(pd_index)
+
+
+def consumer(c_index):
+    """ 消费者线程 """
+    while True:
+        # 从缓冲区取出产品
+        m.remove_item(c_index)
+        # 消费产品
+        m.consume(c_index)
 
 
 if __name__ == '__main__':
     wg = Widget()  # 创建窗口对象
-    m = Manager()  # 实例化管程
 
     # 创建5个生产者线程
     for i in range(5):
-        threading.Thread(target=m.producer, args=(i + 1, )).start()
+        threading.Thread(target=producer, args=(i + 1,)).start()
 
     # 创建3个消费者线程
     for i in range(3):
-        threading.Thread(target=m.consumer, args=(i + 1, )).start()
+        threading.Thread(target=consumer, args=(i + 1,)).start()
 
     # 启动GUI
     wg.run()
