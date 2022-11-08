@@ -21,6 +21,7 @@ def synchronized(func):
 
 
 class Widget:
+    """ 窗口 """
     # 初始化生产者的颜色
     color_list = ['grey', 'pink', 'yellow', 'green', 'purple', 'red']
 
@@ -97,7 +98,8 @@ class Widget:
         self.root.mainloop()  # 进入消息循环
 
 
-class Manager:
+class Monitor:
+    """ 管程 """
     empty = threading.Semaphore(10)  # 同步信号量，表示空闲缓冲区的数量
     full = threading.Semaphore(0)  # 同步信号量，表示产品的数量，即非空缓冲区的数量
 
