@@ -8,8 +8,6 @@ from queue import Queue
 from random import random
 from time import sleep
 
-import threading
-
 
 # 实现synchronized装饰器，保证互斥访问
 def synchronized(func):
