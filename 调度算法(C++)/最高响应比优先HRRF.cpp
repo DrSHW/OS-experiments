@@ -1,3 +1,7 @@
+/*
+    status: Pending
+*/
+
 #include <iostream>
 #include <queue>
 
@@ -8,14 +12,14 @@ typedef pair<int, int> PII;
 const int N = 15;
 const int M = 1e5 + 10;
 
-int n;                    // ½ø³ÌÊı
-int arrival[N], burst[N]; // µ½´ïÊ±¼ä£¬·şÎñÊ±¼ä
-// ¶¨ÒåÏìÓ¦±È
+int n;                    // è¿›ç¨‹æ•°
+int arrival[N], burst[N]; // åˆ°è¾¾æ—¶é—´ï¼ŒæœåŠ¡æ—¶é—´
+// å®šä¹‰å“åº”æ¯”
 double response_ratio[N];
-int state[N] = {0}; // ¼ÇÂ¼½ø³ÌÊÇ·ñ½øÈë¹ı¶ÓÁĞ£¨Ò²¾ÍÊÇÊÇ·ñÍê³É£©
-// ¼ÇÂ¼ÖÜ×ªÊ±¼ä£¬´øÈ¨ÖÜ×ªÊ±¼ä
+int state[N] = {0}; // è®°å½•è¿›ç¨‹æ˜¯å¦è¿›å…¥è¿‡é˜Ÿåˆ—ï¼ˆä¹Ÿå°±æ˜¯æ˜¯å¦å®Œæˆï¼‰
+// è®°å½•å‘¨è½¬æ—¶é—´ï¼Œå¸¦æƒå‘¨è½¬æ—¶é—´
 double turn_around_time[N], weighted_turn_around_time[N];
-// Ö¸¶¨ÓÅÏÈ¼¶±È½Ïº¯Êı£¬ÓÃÓÚÓÅÏÈ¶ÓÁĞ
+// æŒ‡å®šä¼˜å…ˆçº§æ¯”è¾ƒå‡½æ•°ï¼Œç”¨äºä¼˜å…ˆé˜Ÿåˆ—
 struct cmp
 {
     bool operator()(PII a, PII b)
@@ -25,7 +29,7 @@ struct cmp
 };
 
 /*
-²âÊÔÊı¾İ
+æµ‹è¯•æ•°æ®
 4
 0 7
 2 4
@@ -37,10 +41,10 @@ int main()
 {
     int n;
     cin >> n;
-    // ÊäÈë¸÷¸ö½ø³ÌµÄµ½´ïÊ±¼ä£¬·şÎñÊ±¼ä
+    // è¾“å…¥å„ä¸ªè¿›ç¨‹çš„åˆ°è¾¾æ—¶é—´ï¼ŒæœåŠ¡æ—¶é—´
     for (int i = 0; i < n; i++)
         cin >> arrival[i] >> burst[i];
-    // °´ÕÕµ½´ïÊ±¼äÅÅĞò
+    // æŒ‰ç…§åˆ°è¾¾æ—¶é—´æ’åº
     for (int i = 0; i < n; i++)
         for (int j = i + 1; j < n; j++)
             if (arrival[i] > arrival[j])
@@ -48,96 +52,96 @@ int main()
                 swap(arrival[i], arrival[j]);
                 swap(burst[i], burst[j]);
             }
-    cout << "========= ½ø³Ì»ù±¾ĞÅÏ¢ =========" << endl
+    cout << "========= è¿›ç¨‹åŸºæœ¬ä¿¡æ¯ =========" << endl
          << endl;
-    // ´òÓ¡¸÷¸ö½ø³ÌÅÅĞòºóµÄ±àºÅ¡¢µ½´ïÊ±¼ä¡¢·şÎñÊ±¼ä¡¢ÓÅÏÈ¼¶
-    cout << "½ø³Ì\tµ½´ïÊ±¼ä\t·şÎñÊ±¼ä" << endl;
+    // æ‰“å°å„ä¸ªè¿›ç¨‹æ’åºåçš„ç¼–å·ã€åˆ°è¾¾æ—¶é—´ã€æœåŠ¡æ—¶é—´ã€ä¼˜å…ˆçº§
+    cout << "è¿›ç¨‹\tåˆ°è¾¾æ—¶é—´\tæœåŠ¡æ—¶é—´" << endl;
     for (int i = 0; i < n; i++)
         cout << i + 1 << "\t" << arrival[i] << "\t\t" << burst[i] << endl;
     cout << endl
          << endl
-         << "============== Ö´ĞĞÏ¸½Ú ==============" << endl
+         << "============== æ‰§è¡Œç»†èŠ‚ ==============" << endl
          << endl;
-    // ÏÈ´¦Àí×îÏÈµ½´ïµÄ½ø³Ì£¬ÓÉ´Ë¼ÆËãÏìÓ¦±È
-    int totTime = burst[0] + arrival[0]; // ×ÜÊ±¼ä
-    bool flag = false;                   // ½ø³ÌÊÇ·ñÈ«²¿Ö´ĞĞÍê±Ï
-    // ´òÓ¡ÕâĞ©Ê±¿ÌµÄ½ø³ÌÖ´ĞĞÇé¿ö
+    // å…ˆå¤„ç†æœ€å…ˆåˆ°è¾¾çš„è¿›ç¨‹ï¼Œç”±æ­¤è®¡ç®—å“åº”æ¯”
+    int totTime = burst[0] + arrival[0]; // æ€»æ—¶é—´
+    bool flag = false;                   // è¿›ç¨‹æ˜¯å¦å…¨éƒ¨æ‰§è¡Œå®Œæ¯•
+    // æ‰“å°è¿™äº›æ—¶åˆ»çš„è¿›ç¨‹æ‰§è¡Œæƒ…å†µ
     for (int i = 0; i < arrival[0]; i++)
-        cout << "Ê±¿Ì£º" << i + 1 << "£¬ÎŞ½ø³ÌÖ´ĞĞ" << endl;
+        cout << "æ—¶åˆ»ï¼š" << i + 1 << "ï¼Œæ— è¿›ç¨‹æ‰§è¡Œ" << endl;
     for (int i = arrival[0]; i < totTime; i++)
     {
         if (burst[0] > 0)
-            cout << "Ê±¿Ì£º" << i + 1 << "£¬Ö´ĞĞ½ø³Ì£º" << 1 << "£¬Ê£Óà·şÎñÊ±¼ä£º" << burst[0] - i - 1 << endl;
+            cout << "æ—¶åˆ»ï¼š" << i + 1 << "ï¼Œæ‰§è¡Œè¿›ç¨‹ï¼š" << 1 << "ï¼Œå‰©ä½™æœåŠ¡æ—¶é—´ï¼š" << burst[0] - i - 1 << endl;
         if (burst[0] - i - 1 == 0)
-            cout << "½ø³Ì" << 1 << "Ö´ĞĞÍê±Ï" << endl;
+            cout << "è¿›ç¨‹" << 1 << "æ‰§è¡Œå®Œæ¯•" << endl;
     }
     state[0] = 1;
-    // ¼ÆËãÏìÓ¦±È
+    // è®¡ç®—å“åº”æ¯”
     for (int i = 0; i < n; i++)
         response_ratio[i] = (double)(burst[i] + arrival[i]) / burst[i];
-    // ¼ÆËãÖÜ×ªÊ±¼ä£¬´øÈ¨ÖÜ×ªÊ±¼ä
+    // è®¡ç®—å‘¨è½¬æ—¶é—´ï¼Œå¸¦æƒå‘¨è½¬æ—¶é—´
     turn_around_time[0] = burst[0] + arrival[0];
     weighted_turn_around_time[0] = (double)turn_around_time[0] / burst[0];
-    // ÓÅÏÈ¶ÓÁĞ£¬°´ÕÕÏìÓ¦±ÈÎª¹Ø¼ü×ÖÅÅĞò
+    // ä¼˜å…ˆé˜Ÿåˆ—ï¼ŒæŒ‰ç…§å“åº”æ¯”ä¸ºå…³é”®å­—æ’åº
     priority_queue<PII, vector<PII>, cmp> processing_queue;
-    // ´´½¨burstµÄ¸±±¾
+    // åˆ›å»ºburstçš„å‰¯æœ¬
     int burst_copy[N];
     for (int i = 0; i < n; i++)
         burst_copy[i] = burst[i];
     while (!flag)
     {
-        // ½«ËùÓĞµ½´ïµÄ½ø³Ì¼ÓÈë¶ÓÁĞ
+        // å°†æ‰€æœ‰åˆ°è¾¾çš„è¿›ç¨‹åŠ å…¥é˜Ÿåˆ—
         for (int i = 0; i < n; i++)
             if (arrival[i] <= totTime && state[i] == 0)
             {
                 processing_queue.push(make_pair(response_ratio[i], i));
                 state[i] = 1;
             }
-        // Èô¶ÓÁĞÎª¿Õ£¬ÔòÊ±¼ä¼ÓÒ»
+        // è‹¥é˜Ÿåˆ—ä¸ºç©ºï¼Œåˆ™æ—¶é—´åŠ ä¸€
         if (processing_queue.empty())
         {
-            cout << "Ê±¿Ì£º" << ++totTime << "£¬ÎŞ½ø³ÌÖ´ĞĞ" << endl;
+            cout << "æ—¶åˆ»ï¼š" << ++totTime << "ï¼Œæ— è¿›ç¨‹æ‰§è¡Œ" << endl;
             continue;
         }
-        // ´Ó¶ÓÁĞÖĞÈ¡³öÏìÓ¦±È×î¸ßµÄ½ø³ÌÖ´ĞĞ
+        // ä»é˜Ÿåˆ—ä¸­å–å‡ºå“åº”æ¯”æœ€é«˜çš„è¿›ç¨‹æ‰§è¡Œ
         PII p = processing_queue.top();
-        processing_queue.pop(); // ¸ÃËã·¨ÊÇ·Ç°ş¶áµÄ£¬È¡³ö¼´»áÖ´ĞĞÍê±Ï
+        processing_queue.pop(); // è¯¥ç®—æ³•æ˜¯éå‰¥å¤ºçš„ï¼Œå–å‡ºå³ä¼šæ‰§è¡Œå®Œæ¯•
         int index = p.second;
-        // ´òÓ¡ÕâĞ©Ê±¿ÌµÄ½ø³ÌÖ´ĞĞÇé¿ö
+        // æ‰“å°è¿™äº›æ—¶åˆ»çš„è¿›ç¨‹æ‰§è¡Œæƒ…å†µ
         for (int i = 0; i < burst[index]; i++)
         {
             if (burst[index] > 0)
-                cout << "Ê±¿Ì£º" << totTime + i + 1 << "£¬Ö´ĞĞ½ø³Ì£º" << index + 1 << "£¬Ê£Óà·şÎñÊ±¼ä£º" << burst[index] - i - 1 << endl;
+                cout << "æ—¶åˆ»ï¼š" << totTime + i + 1 << "ï¼Œæ‰§è¡Œè¿›ç¨‹ï¼š" << index + 1 << "ï¼Œå‰©ä½™æœåŠ¡æ—¶é—´ï¼š" << burst[index] - i - 1 << endl;
             if (burst[index] - i - 1 == 0)
             {
-                cout << "½ø³Ì" << index + 1 << "Ö´ĞĞÍê±Ï" << endl;
-                // ¼ÆËãÏìÓ¦±È
+                cout << "è¿›ç¨‹" << index + 1 << "æ‰§è¡Œå®Œæ¯•" << endl;
+                // è®¡ç®—å“åº”æ¯”
                 for (int i = 0; i < n; i++)
                     response_ratio[i] = (double)(burst_copy[i] + arrival[i]) / burst_copy[i];
-                // ¼ÆËãÖÜ×ªÊ±¼äºÍ´øÈ¨ÖÜ×ªÊ±¼ä
+                // è®¡ç®—å‘¨è½¬æ—¶é—´å’Œå¸¦æƒå‘¨è½¬æ—¶é—´
                 turn_around_time[index] = totTime + burst_copy[index] - arrival[index];
                 weighted_turn_around_time[index] = (double)turn_around_time[index] / burst_copy[index];
             }
         }
-        totTime += burst[index];   // ¸üĞÂ×ÜÊ±¼ä
-        burst[index] = 0;   // ¸üĞÂ·şÎñÊ±¼ä£¬Ö´ĞĞÍê±ÏÊ£Óà0
-        // ÅĞ¶ÏÊÇ·ñËùÓĞ½ø³Ì¶¼Ö´ĞĞÍê±Ï£¬Ö´ĞĞÍê±ÏÔòÍË³öÑ­»·
+        totTime += burst[index];   // æ›´æ–°æ€»æ—¶é—´
+        burst[index] = 0;   // æ›´æ–°æœåŠ¡æ—¶é—´ï¼Œæ‰§è¡Œå®Œæ¯•å‰©ä½™0
+        // åˆ¤æ–­æ˜¯å¦æ‰€æœ‰è¿›ç¨‹éƒ½æ‰§è¡Œå®Œæ¯•ï¼Œæ‰§è¡Œå®Œæ¯•åˆ™é€€å‡ºå¾ªç¯
         flag = true;
         for (int i = 1; i < n; i++)
             if (burst[i] > 0)
                 flag = false;
     }
-    cout << "ËùÓĞ½ø³Ì¾ùÖ´ĞĞÍê±Ï£¬ºÄÊ±" << totTime << "¡£" << endl;
+    cout << "æ‰€æœ‰è¿›ç¨‹å‡æ‰§è¡Œå®Œæ¯•ï¼Œè€—æ—¶" << totTime << "ã€‚" << endl;
     cout << endl
          << endl
-         << "============================= Ö´ĞĞ×Ü½á =============================" << endl
+         << "============================= æ‰§è¡Œæ€»ç»“ =============================" << endl
          << endl;
-    // ´òÓ¡½ø³ÌÖ´ĞĞÇé¿ö
-    cout << "½ø³Ì\tµ½´ïÊ±¼ä\t·şÎñÊ±¼ä\tÖÜ×ªÊ±¼ä\t´øÈ¨ÖÜ×ªÊ±¼ä" << endl;
+    // æ‰“å°è¿›ç¨‹æ‰§è¡Œæƒ…å†µ
+    cout << "è¿›ç¨‹\tåˆ°è¾¾æ—¶é—´\tæœåŠ¡æ—¶é—´\tå‘¨è½¬æ—¶é—´\tå¸¦æƒå‘¨è½¬æ—¶é—´" << endl;
     for (int i = 0; i < n; i++)
         cout << i + 1 << "\t" << arrival[i] << "\t\t" << burst_copy[i] << "\t\t" << turn_around_time[i] << "\t\t" << weighted_turn_around_time[i] << endl;
 
-    // ¼ÆËã²¢´òÓ¡Æ½¾ùÖÜ×ªÊ±¼ä£¬Æ½¾ù´øÈ¨ÖÜ×ªÊ±¼ä
+    // è®¡ç®—å¹¶æ‰“å°å¹³å‡å‘¨è½¬æ—¶é—´ï¼Œå¹³å‡å¸¦æƒå‘¨è½¬æ—¶é—´
     double avg_turn_around_time = 0, avg_weighted_turn_around_time = 0;
     for (int i = 0; i < n; i++)
     {
@@ -146,7 +150,7 @@ int main()
     }
     avg_turn_around_time /= n;
     avg_weighted_turn_around_time /= n;
-    cout << "Æ½¾ùÖÜ×ªÊ±¼ä£º" << avg_turn_around_time << endl;
-    cout << "Æ½¾ù´øÈ¨ÖÜ×ªÊ±¼ä£º" << avg_weighted_turn_around_time << endl;
+    cout << "å¹³å‡å‘¨è½¬æ—¶é—´ï¼š" << avg_turn_around_time << endl;
+    cout << "å¹³å‡å¸¦æƒå‘¨è½¬æ—¶é—´ï¼š" << avg_weighted_turn_around_time << endl;
     return 0;
 }
