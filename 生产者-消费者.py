@@ -99,7 +99,7 @@ class Widget:
 
 
 class Monitor:
-    """ 管程 """
+    """ 管程类，负责对缓冲区的访问控制 """
     empty = threading.Semaphore(10)  # 同步信号量，表示空闲缓冲区的数量
     full = threading.Semaphore(0)  # 同步信号量，表示产品的数量，即非空缓冲区的数量
 
@@ -122,18 +122,6 @@ class Monitor:
         self.empty.release()  # 实现同步，增加一个空闲缓冲区
 
     @staticmethod
-    def produce(pd_index):
-        """ 生产产品 """
-        sleep(random())  # 模拟生产产品的时间
-        getattr(wg, 'p' + str(pd_index)).config(bg=wg.color_list[pd_index])  # 持有产品后，生产者变为彩色
-
-    @staticmethod
-    def consume(c_index):
-        """ 消费产品 """
-        sleep(random() / 1.25)  # 模拟消费产品的时间
-        getattr(wg, 'c' + str(c_index)).config(bg=wg.color_list[0])  # 消费产品后，消费者变为灰色
-
-    @staticmethod
     def __add_item(pd_index, b_q):
         """ 将产品放入缓冲区，设为私有方法 """
         sleep(random())  # 模拟将产品放入缓冲区的时间
@@ -152,37 +140,59 @@ class Monitor:
         wg.reduce_button_in_buffer()  # 模拟从缓冲区中删除产品
 
 
-m = Monitor()  # 实例化管程
+class Producer:
+    """ 生产者类 """
+    def __init__(self, monitor):    # 初始化，传入管程对象
+        self.monitor = monitor
+
+    def run(self, pd_index):
+        """ 生产者主线程 """
+        while True:
+            # 生产产品
+            self.__produce(pd_index)
+            # 将产品放入缓冲区
+            self.monitor.insert_item(pd_index)
+
+    @staticmethod
+    def __produce(pd_index):
+        """ 生产产品，生产者类的私有方法 """
+        sleep(random())  # 模拟生产产品的时间
+        getattr(wg, 'p' + str(pd_index)).config(bg=wg.color_list[pd_index])  # 持有产品后，生产者变为彩色
 
 
-def producer(pd_index):
-    """ 生产者线程 """
-    while True:
-        # 生产产品
-        m.produce(pd_index)
-        # 将产品放入缓冲区
-        m.insert_item(pd_index)
+class Consumer:
+    """ 消费者类 """
+    def __init__(self, monitor):    # 初始化，传入管程对象
+        self.monitor = monitor
 
+    def run(self, c_index):
+        """ 消费者主线程 """
+        while True:
+            # 从缓冲区取出产品
+            self.monitor.remove_item(c_index)
+            # 消费产品
+            self.__consume(c_index)
 
-def consumer(c_index):
-    """ 消费者线程 """
-    while True:
-        # 从缓冲区取出产品
-        m.remove_item(c_index)
-        # 消费产品
-        m.consume(c_index)
+    @staticmethod
+    def __consume(c_index):
+        """ 消费产品，，消费者类的私有方法 """
+        sleep(random() / 1.25)  # 模拟消费产品的时间
+        getattr(wg, 'c' + str(c_index)).config(bg=wg.color_list[0])  # 消费产品后，消费者变为灰色
 
 
 if __name__ == '__main__':
     wg = Widget()  # 创建窗口对象
+    m = Monitor()  # 实例化管程
+    pd = Producer(m)  # 实例化生产者
+    cs = Consumer(m)  # 实例化消费者
 
     # 创建5个生产者线程
     for i in range(5):
-        threading.Thread(target=producer, args=(i + 1,)).start()
+        threading.Thread(target=pd.run, args=(i + 1,)).start()
 
     # 创建3个消费者线程
     for i in range(3):
-        threading.Thread(target=consumer, args=(i + 1,)).start()
+        threading.Thread(target=cs.run, args=(i + 1,)).start()
 
     # 启动GUI
     wg.run()
