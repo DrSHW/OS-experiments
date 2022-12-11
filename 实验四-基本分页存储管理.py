@@ -75,14 +75,14 @@ class JobList:
         for job in self.jobs:  # 遍历作业列表
             if job.job_id == job_id:  # 找到要查找的作业
                 return job
-        return None
+        return None     # 找不到则返回None
 
     def delete_job(self, job_id):
         for job in self.jobs:  # 遍历作业列表
             if job.job_id == job_id:  # 找到要删除的作业
                 self.jobs.remove(job)  # 删除作业
                 return job
-        return None
+        return None     # 找不到则返回None
 
 
 # 初始化
