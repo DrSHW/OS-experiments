@@ -11,6 +11,7 @@ class Job:
     """
         作业类，包含作业号、作业大小、占用物理块号、状态
     """
+
     def __init__(self, job_id, size):
         self.job_id = job_id  # 作业号
         self.size = size  # 作业大小
@@ -29,6 +30,7 @@ class StatusMatrix:
     """
         状态矩阵类，包含物理块数、状态矩阵
     """
+
     def __init__(self, size):
         self.size = size  # 物理块数
         self.matrix = [0] * self.size  # 初始化状态矩阵
@@ -59,6 +61,7 @@ class JobList:
     """
         作业列表类，包含作业列表
     """
+
     def __init__(self):
         self.jobs = []  # 作业列表
 
@@ -75,14 +78,14 @@ class JobList:
         for job in self.jobs:  # 遍历作业列表
             if job.job_id == job_id:  # 找到要查找的作业
                 return job
-        return None     # 找不到则返回None
+        return None  # 找不到则返回None
 
     def delete_job(self, job_id):
         for job in self.jobs:  # 遍历作业列表
             if job.job_id == job_id:  # 找到要删除的作业
                 self.jobs.remove(job)  # 删除作业
                 return job
-        return None     # 找不到则返回None
+        return None  # 找不到则返回None
 
 
 # 初始化
@@ -226,14 +229,12 @@ def search():
         messagebox.showinfo('提示', '该作业号不存在，查找失败！')
         wd.entry4.delete(0, END)  # 清空输入框
 
+
 # 退出
 def _quit():
     print('退出成功！')
     messagebox.showinfo('提示', '退出成功！')
     wd.root.destroy()
-
-
-init()
 
 
 class Window:
@@ -284,9 +285,10 @@ class Window:
         self.exit_button.place(x=50, y=250, width=100, height=30)
 
     def run(self):
-        self.root.mainloop()    # 启动GUI
+        self.root.mainloop()  # 启动GUI
 
 
 if __name__ == '__main__':
-    wd = Window()   # 实例化窗口对象
-    wd.run()    # 启动GUI
+    init()  # 初始化关键参数
+    wd = Window()  # 实例化窗口对象
+    wd.run()  # 启动GUI
