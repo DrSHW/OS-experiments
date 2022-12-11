@@ -149,6 +149,9 @@ def allocate():
         print('作业列表：', job_list)
         print('----------------------------------------')
         messagebox.showinfo('提示', '空闲物理块空间不足，分配失败！')
+        # 清空输入框
+        wd.entry1.delete(0, END)
+        wd.entry2.delete(0, END)
 
 
 # 回收
@@ -184,6 +187,7 @@ def recycle():
         print('状态矩阵：', status_matrix)
         print('作业列表：', job_list)
         print('----------------------------------------')
+        wd.entry3.delete(0, END)  # 清空输入框
         messagebox.showinfo('提示', '该作业号不存在，回收失败！')
 
 
@@ -220,7 +224,7 @@ def search():
         print('作业列表：', job_list)
         print('----------------------------------------')
         messagebox.showinfo('提示', '该作业号不存在，查找失败！')
-
+        wd.entry4.delete(0, END)  # 清空输入框
 
 # 退出
 def _quit():
@@ -286,4 +290,3 @@ class Window:
 if __name__ == '__main__':
     wd = Window()   # 实例化窗口对象
     wd.run()    # 启动GUI
-    
