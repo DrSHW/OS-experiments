@@ -130,9 +130,9 @@ def allocate():
         wd.entry1.delete(0, END)
         wd.entry2.delete(0, END)
         return
-    job = Job(job_id, size)  # 创建作业
     free_blocks = status_matrix.get_free_blocks()  # 获取空闲物理块
     if len(free_blocks) >= size:  # 如果空闲物理块数大于等于作业大小，则分配成功，否则分配失败
+        job = Job(job_id, size)  # 创建作业
         blocks = random.sample(free_blocks, size)  # 随机分配
         job.blocks = blocks  # 记录分配的物理块号
         job.status = 1  # 记录作业状态
