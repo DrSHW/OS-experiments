@@ -20,7 +20,7 @@ def synchronized(func):
     return synced_func
 
 
-class Widget:
+class Window:
     """ 窗口 """
     # 初始化生产者的颜色
     color_list = ['grey', 'pink', 'yellow', 'green', 'purple', 'orange']
@@ -125,19 +125,19 @@ class Monitor:
     def __add_item(pd_index, b_q):
         """ 将产品放入缓冲区，设为私有方法 """
         sleep(random())  # 模拟将产品放入缓冲区的时间
-        wg.add_button_in_buffer(pd_index, wg.num + 1)  # 模拟将产品放入缓冲区
+        wd.add_button_in_buffer(pd_index, wd.num + 1)  # 模拟将产品放入缓冲区
         b_q.put(
-            {'pd_index': pd_index, 'obj_index': wg.num}  # 将生产的产品放入缓冲区
+            {'pd_index': pd_index, 'obj_index': wd.num}  # 将生产的产品放入缓冲区
         )
-        getattr(wg, 'p' + str(pd_index)).config(bg=wg.color_list[0])  # 将产品放入缓冲区后，生产者变为灰色
+        getattr(wd, 'p' + str(pd_index)).config(bg=wd.color_list[0])  # 将产品放入缓冲区后，生产者变为灰色
 
     @staticmethod
     def __get_item(c_index, b_q):
         """ 从缓冲区中取出产品，设为私有方法 """
         sleep(random())  # 模拟从缓冲区取出产品的时间
         obj_index = b_q.get()  # 从缓冲区取出产品
-        getattr(wg, 'c' + str(c_index)).config(bg='blue')  # 持有产品后，消费者变为蓝色
-        wg.reduce_button_in_buffer()  # 模拟从缓冲区中删除产品
+        getattr(wd, 'c' + str(c_index)).config(bg='blue')  # 持有产品后，消费者变为蓝色
+        wd.reduce_button_in_buffer()  # 模拟从缓冲区中删除产品
 
 
 class Producer:
@@ -157,7 +157,7 @@ class Producer:
     def __produce(pd_index):
         """ 生产产品，生产者类的私有方法 """
         sleep(random())  # 模拟生产产品的时间
-        getattr(wg, 'p' + str(pd_index)).config(bg=wg.color_list[pd_index])  # 持有产品后，生产者变为彩色
+        getattr(wd, 'p' + str(pd_index)).config(bg=wd.color_list[pd_index])  # 持有产品后，生产者变为彩色
 
 
 class Consumer:
@@ -177,11 +177,11 @@ class Consumer:
     def __consume(c_index):
         """ 消费产品，，消费者类的私有方法 """
         sleep(random() / 1.25)  # 模拟消费产品的时间
-        getattr(wg, 'c' + str(c_index)).config(bg=wg.color_list[0])  # 消费产品后，消费者变为灰色
+        getattr(wd, 'c' + str(c_index)).config(bg=wd.color_list[0])  # 消费产品后，消费者变为灰色
 
 
 if __name__ == '__main__':
-    wg = Widget()  # 创建窗口对象
+    wd = Window()  # 创建窗口对象
     m = Monitor()  # 实例化管程
     pd = Producer(m)  # 实例化生产者
     cs = Consumer(m)  # 实例化消费者
@@ -195,4 +195,4 @@ if __name__ == '__main__':
         threading.Thread(target=cs.run, args=(i + 1,)).start()
 
     # 启动GUI
-    wg.run()
+    wd.run()
