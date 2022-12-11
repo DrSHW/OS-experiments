@@ -99,8 +99,34 @@ def init():
 # 分配
 def allocate():
     global status_matrix, job_list
-    job_id = int(wd.entry1.get())  # 获取输入的作业号
-    size = int(wd.entry2.get())  # 获取输入的作业号和大小
+    # 判断参数是否完整
+    if not (wd.entry1.get() and wd.entry2.get()):
+        messagebox.showinfo('提示', '请输入作业号和作业大小！')
+        return
+    try:
+        job_id = int(wd.entry1.get())  # 获取输入的作业号
+        size = int(wd.entry2.get())  # 获取输入的作业号和大小
+    # 判断参数是否合法
+    except ValueError:
+        messagebox.showinfo('提示', '输入的作业号或作业大小不合法！')
+        # 清空输入框
+        wd.entry1.delete(0, END)
+        wd.entry2.delete(0, END)
+        return
+    if job_id < 0 or size < 0:
+        messagebox.showinfo('提示', '输入的作业号或作业大小应大于0！')
+        # 清空输入框
+        wd.entry1.delete(0, END)
+        wd.entry2.delete(0, END)
+        return
+    # 判断作业号是否已存在
+    if job_list.get_job(job_id) is not None:
+        print('作业号已存在！')
+        messagebox.showinfo('提示', '作业号已存在，分配失败！')
+        # 清空输入框
+        wd.entry1.delete(0, END)
+        wd.entry2.delete(0, END)
+        return
     job = Job(job_id, size)  # 创建作业
     free_blocks = status_matrix.get_free_blocks()  # 获取空闲物理块
     if len(free_blocks) >= size:  # 如果空闲物理块数大于等于作业大小，则分配成功，否则分配失败
@@ -122,13 +148,28 @@ def allocate():
         print('状态矩阵：', status_matrix)
         print('作业列表：', job_list)
         print('----------------------------------------')
-        messagebox.showinfo('提示', '分配失败！')
+        messagebox.showinfo('提示', '空闲物理块空间不足，分配失败！')
 
 
 # 回收
 def recycle():
     global status_matrix, job_list
-    job_id = int(wd.entry3.get())  # 获取输入的作业号
+    # 判断参数是否完整
+    if not wd.entry3.get():
+        messagebox.showinfo('提示', '请输入作业号！')
+        return
+    try:
+        job_id = int(wd.entry3.get())  # 获取输入的作业号
+    except ValueError:
+        messagebox.showinfo('提示', '输入的作业号不合法！')
+        # 清空输入框
+        wd.entry3.delete(0, END)
+        return
+    if job_id < 0:
+        messagebox.showinfo('提示', '输入的作业号应大于0！')
+        # 清空输入框
+        wd.entry3.delete(0, END)
+        return
     job = job_list.delete_job(job_id)  # 从作业列表中删除作业
     if job is not None:
         status_matrix.recycle(job.blocks)  # 回收物理块
@@ -143,13 +184,28 @@ def recycle():
         print('状态矩阵：', status_matrix)
         print('作业列表：', job_list)
         print('----------------------------------------')
-        messagebox.showinfo('提示', '回收失败！')
+        messagebox.showinfo('提示', '该作业号不存在，回收失败！')
 
 
 # 查找
 def search():
     global status_matrix, job_list
-    job_id = int(wd.entry4.get())  # 获取输入的作业号
+    # 判断参数是否完整
+    if not wd.entry4.get():
+        messagebox.showinfo('提示', '请输入作业号！')
+        return
+    try:
+        job_id = int(wd.entry4.get())  # 获取输入的作业号
+    except ValueError:
+        messagebox.showinfo('提示', '输入的作业号不合法！')
+        # 清空输入框
+        wd.entry4.delete(0, END)
+        return
+    if job_id < 0:
+        messagebox.showinfo('提示', '输入的作业号应大于0！')
+        # 清空输入框
+        wd.entry4.delete(0, END)
+        return
     job = job_list.get_job(job_id)  # 从作业列表中查找作业
     if job is not None:
         print('查找成功！')
@@ -163,7 +219,7 @@ def search():
         print('状态矩阵：', status_matrix)
         print('作业列表：', job_list)
         print('----------------------------------------')
-        messagebox.showinfo('提示', '查找失败！')
+        messagebox.showinfo('提示', '该作业号不存在，查找失败！')
 
 
 # 退出
@@ -230,3 +286,4 @@ class Window:
 if __name__ == '__main__':
     wd = Window()   # 实例化窗口对象
     wd.run()    # 启动GUI
+    
