@@ -1,7 +1,3 @@
-/*
-    status: Pending
-*/
-
 #include <iostream>
 #include <string>
 #include <stdlib.h>
