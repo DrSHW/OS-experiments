@@ -1,3 +1,7 @@
+"""
+    status: Pending
+"""
+
 from tkinter import *
 import random
 from tkinter import messagebox
@@ -173,7 +177,9 @@ init()
 
 
 class Window:
-    # 界面
+    """ 
+        界面类，用于创建界面中的各个组件
+    """
     root = Tk()
     # 初始化区域
     init_button = Button(root, text='初始化', command=init)
@@ -218,9 +224,9 @@ class Window:
         self.exit_button.place(x=50, y=250, width=100, height=30)
 
     def run(self):
-        self.root.mainloop()
+        self.root.mainloop()    # 启动GUI
 
 
 if __name__ == '__main__':
-    wd = Window()
-    wd.run()
+    wd = Window()   # 实例化窗口对象
+    wd.run()    # 启动GUI
