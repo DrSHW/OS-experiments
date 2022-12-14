@@ -12,7 +12,6 @@ class Job:
     """
         作业类，包含作业号、作业大小、占用物理块号、状态
     """
-
     def __init__(self, job_id, size):
         self.job_id = job_id  # 作业号
         self.size = size  # 作业大小
@@ -29,9 +28,8 @@ class Job:
 
 class StatusMatrix:
     """
-        状态矩阵类，包含物理块数、状态矩阵
+        状态矩阵类，包含物理块数、状态矩阵、页表
     """
-
     def __init__(self, block_num=128, block_size=8):
         self.block_num = block_num  # 物理块数
         # 单个物理块的大小
@@ -83,7 +81,6 @@ class JobList:
     """
         作业列表类，包含作业列表
     """
-
     def __init__(self):
         self.jobs = []  # 作业列表
 
@@ -149,7 +146,7 @@ def check():
     print('----------------------------------------')
 
 
-# 分配
+# 分配内存给作业
 def allocate():
     global status_matrix, job_list
     # 判断参数是否完整
@@ -205,7 +202,7 @@ def allocate():
         wd.entry2.delete(0, END)
 
 
-# 回收
+# 回收作业，释放内存
 def recycle():
     global status_matrix, job_list
     # 判断参数是否完整
@@ -238,7 +235,7 @@ def recycle():
         messagebox.showinfo('提示', '该作业号不存在，回收失败！')
 
 
-# 查找
+# 查找作业
 def search_job():
     global status_matrix, job_list
     # 判断参数是否完整
@@ -249,13 +246,11 @@ def search_job():
         job_id = int(wd.entry4.get())  # 获取输入的作业号
     except ValueError:
         messagebox.showinfo('提示', '输入的作业号不合法！')
-        # 清空输入框
-        wd.entry4.delete(0, END)
+        wd.entry4.delete(0, END)  # 清空输入框
         return
     if job_id < 0:
         messagebox.showinfo('提示', '输入的作业号应大于0！')
-        # 清空输入框
-        wd.entry4.delete(0, END)
+        wd.entry4.delete(0, END)  # 清空输入框
         return
     job = job_list.get_job_by_id(job_id)  # 从作业列表中查找作业
     if job is not None:
@@ -275,29 +270,37 @@ def search_job():
         wd.entry4.delete(0, END)  # 清空输入框
 
 
-# 查找
+# 查找逻辑地址
 def search_page():
     global status_matrix, job_list
     # 判断参数是否完整
-    if not wd.entry5.get():
-        messagebox.showinfo('提示', '请输入作业号！')
+    if not wd.entry5.get() or not wd.entry6.get():
+        messagebox.showinfo('提示', '请输入完整的逻辑地址！')
         return
     try:
         page_id = int(wd.entry5.get())  # 获取输入的作业号
+        offset = int(wd.entry6.get())  # 获取输入的偏移量
     except ValueError:
-        messagebox.showinfo('提示', '输入的作业号不合法！')
+        messagebox.showinfo('提示', '输入的逻辑地址不合法！')
         # 清空输入框
         wd.entry5.delete(0, END)
+        wd.entry6.delete(0, END)
         return
     if page_id < 0:
         messagebox.showinfo('提示', '输入的页号应大于0！')
-        # 清空输入框
-        wd.entry5.delete(0, END)
+        wd.entry5.delete(0, END)  # 清空输入框
         return
     if page_id > len(status_matrix.page_list):
         messagebox.showinfo('提示', '输入的页号超出范围！')
-        # 清空输入框
-        wd.entry5.delete(0, END)
+        wd.entry5.delete(0, END)  # 清空输入框
+        return
+    if offset < 0:
+        messagebox.showinfo('提示', '输入的偏移量应大于0！')
+        wd.entry6.delete(0, END)  # 清空输入框
+        return
+    if offset > status_matrix.block_size:
+        messagebox.showinfo('提示', '输入的偏移量超出单页面大小！')
+        wd.entry6.delete(0, END)  # 清空输入框
         return
     page = status_matrix.page_list[page_id]  # 从页表中查找页
     if page != -1:
@@ -306,8 +309,9 @@ def search_page():
         print('该页的页号为：', page_id)
         print('该页对应物理块号为：', status_matrix.page_list[page_id - 1])
         print('该页中实际占用空间', status_matrix.matrix[status_matrix.page_list[page_id - 1]])
-        job = job_list.get_job_by_block(status_matrix.page_list[page_id - 1])   # 查找该页对应的作业
+        job = job_list.get_job_by_block(status_matrix.page_list[page_id - 1])  # 查找该页对应的作业
         print('该页对应的作业号为：', job.job_id)
+        print('该逻辑地址对应的物理地址为：' + str(status_matrix.block_size * (status_matrix.page_list[page_id - 1] - 1) + offset))
         print('----------------------------------------')
         messagebox.showinfo('提示', '查找成功！')
         wd.entry5.delete(0, END)
@@ -349,14 +353,16 @@ class Window:
     search_job_button = Button(root, text='查找', command=search_job)
     label5 = Label(root, text='页号')
     entry5 = Entry(root)
-    notice_label = Label(root, text='提示：作业号为分配过的作业号，页号从0开始')
-    search_page_button = Button(root, text='查找', command=search_page)
+    notice_label = Label(root, text='提示：页号从0开始，页内偏移量应小于块大小')
+    label6 = Label(root, text='页内偏移量')
+    entry6 = Entry(root)
+    search_page_button = Button(root, text='计算物理地址', command=search_page)
     # 退出区域
     exit_button = Button(root, text='退出', command=_quit)
 
     def __init__(self):
         self.root.title('内存分配模拟')
-        self.root.geometry('500x300')
+        self.root.geometry('600x350')
         self.root.resizable(0, 0)
         # 全局设置区域
         self.init_button.place(x=50, y=50, width=100, height=30)
@@ -375,9 +381,12 @@ class Window:
         self.label4.place(x=50, y=200, width=50, height=30)
         self.entry4.place(x=100, y=200, width=50, height=30)
         self.search_job_button.place(x=150, y=200, width=100, height=30)
+        self.notice_label.place(x=280, y=150, width=250, height=30)
         self.label5.place(x=250, y=200, width=50, height=30)
         self.entry5.place(x=300, y=200, width=50, height=30)
-        self.search_page_button.place(x=350, y=200, width=100, height=30)
+        self.label6.place(x=350, y=200, width=80, height=30)
+        self.entry6.place(x=430, y=200, width=50, height=30)
+        self.search_page_button.place(x=480, y=200, width=80, height=30)
         # 退出区域
         self.exit_button.place(x=50, y=250, width=100, height=30)
 
