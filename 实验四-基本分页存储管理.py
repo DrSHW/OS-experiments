@@ -356,7 +356,7 @@ class Window:
     notice_label = Label(root, text='提示：页号从0开始，页内偏移量应小于块大小')
     label6 = Label(root, text='页内偏移量')
     entry6 = Entry(root)
-    search_page_button = Button(root, text='计算物理地址', command=search_page)
+    search_page_button = Button(root, text='查找', command=search_page)
     # 退出区域
     exit_button = Button(root, text='退出', command=_quit)
 
