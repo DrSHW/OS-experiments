@@ -298,17 +298,17 @@ def search_page():
         messagebox.showinfo('提示', '输入的偏移量应大于0！')
         wd.entry6.delete(0, END)  # 清空输入框
         return
-    if offset > status_matrix.block_size:
-        messagebox.showinfo('提示', '输入的偏移量超出单页面大小！')
+    page = status_matrix.page_list[page_id]  # 从页表中查找页
+    if offset > status_matrix.matrix[status_matrix.page_list[page_id - 1]]:
+        messagebox.showinfo('提示', '输入的偏移量超出该页面大小！')
         wd.entry6.delete(0, END)  # 清空输入框
         return
-    page = status_matrix.page_list[page_id]  # 从页表中查找页
     if page != -1:
         print('查找成功！')
         # 在page_list中查找到页，显示页信息
         print('该页的页号为：', page_id)
         print('该页对应物理块号为：', status_matrix.page_list[page_id - 1])
-        print('该页中实际占用空间', status_matrix.matrix[status_matrix.page_list[page_id - 1]])
+        print('该页中实际占用空间：', status_matrix.matrix[status_matrix.page_list[page_id - 1]])
         job = job_list.get_job_by_block(status_matrix.page_list[page_id - 1])  # 查找该页对应的作业
         print('该页对应的作业号为：', job.job_id)
         print('该逻辑地址对应的物理地址为：' + str(status_matrix.block_size * (status_matrix.page_list[page_id - 1] - 1) + offset))
@@ -353,7 +353,7 @@ class Window:
     search_job_button = Button(root, text='查找', command=search_job)
     label5 = Label(root, text='页号')
     entry5 = Entry(root)
-    notice_label = Label(root, text='提示：页号从0开始，页内偏移量应小于块大小')
+    notice_label = Label(root, text='提示：页号从0开始，页内偏移量应小于或等于块大小。')
     label6 = Label(root, text='页内偏移量')
     entry6 = Entry(root)
     search_page_button = Button(root, text='查找', command=search_page)
@@ -381,7 +381,7 @@ class Window:
         self.label4.place(x=50, y=200, width=50, height=30)
         self.entry4.place(x=100, y=200, width=50, height=30)
         self.search_job_button.place(x=150, y=200, width=100, height=30)
-        self.notice_label.place(x=280, y=150, width=250, height=30)
+        self.notice_label.place(x=265, y=150, width=300, height=30)
         self.label5.place(x=250, y=200, width=50, height=30)
         self.entry5.place(x=300, y=200, width=50, height=30)
         self.label6.place(x=350, y=200, width=80, height=30)
