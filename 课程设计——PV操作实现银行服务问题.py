@@ -159,6 +159,7 @@ class Receptionist:
 
 
 class Monitor:
+    """ 监视器类，用于定义信号量、进程控制 """
     # 定义信号量
     mutex = threading.Semaphore(1)  # 互斥使用取号机
     empty = threading.Semaphore(10)  # 空座位的数量，设置为10
